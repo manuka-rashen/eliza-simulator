@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ELIZA 95 Simulator</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #008080;
+            font-family: "MS Sans Serif", Tahoma, Arial, sans-serif;
+            font-size: 14px;
+        }
+
+        .desktop {
+            width: 100%;
+            min-height: 100vh;
+            padding: 35px 0;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .main-container {
+            width: 92%;
+            max-width: 1250px;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        .window {
+            width: 100%;
+            background-color: #c0c0c0;
+            border-top: 3px solid #ffffff;
+            border-left: 3px solid #ffffff;
+            border-right: 3px solid #404040;
+            border-bottom: 3px solid #404040;
+            box-shadow: 6px 6px 0px #000000;
+        }
+
+        .title-bar {
+            background: linear-gradient(to right, #000080, #1084d0);
+            color: white;
+            padding: 5px 8px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .window-buttons {
+            display: flex;
+            gap: 3px;
+        }
+
+        .window-buttons button {
+            width: 24px;
+            height: 22px;
+            background-color: #c0c0c0;
+            color: black;
+            border-top: 2px solid #ffffff;
+            border-left: 2px solid #ffffff;
+            border-right: 2px solid #404040;
+            border-bottom: 2px solid #404040;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        .window-buttons button:active {
+            border-top: 2px solid #404040;
+            border-left: 2px solid #404040;
+            border-right: 2px solid #ffffff;
+            border-bottom: 2px solid #ffffff;
+        }
+
+        .menu-bar {
+            background-color: #c0c0c0;
+            padding: 6px 10px;
+            border-bottom: 2px solid #808080;
+        }
+
+        .menu-bar span {
+            margin-right: 25px;
+            cursor: default;
+        }
+
+        .menu-bar span:hover {
+            background-color: #000080;
+            color: white;
+        }
+
+        .window-content {
+            padding: 16px;
+        }
+
+        .program-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .icon-box {
+            width: 58px;
+            height: 58px;
+            background-color: #000080;
+            color: white;
+            border-top: 2px solid #ffffff;
+            border-left: 2px solid #ffffff;
+            border-right: 2px solid #404040;
+            border-bottom: 2px solid #404040;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 34px;
+            font-weight: bold;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 28px;
+            color: black;
+        }
+
+        .program-header p {
+            margin: 5px 0 0;
+            color: #333333;
+            font-size: 15px;
+        }
+
+        .chat-box {
+            height: 320px;
+            overflow-y: auto;
+            background-color: white;
+            border-top: 3px solid #404040;
+            border-left: 3px solid #404040;
+            border-right: 3px solid #ffffff;
+            border-bottom: 3px solid #ffffff;
+            padding: 12px;
+            font-family: "Courier New", monospace;
+            color: black;
+        }
+
+        .user-message,
+        .bot-message {
+            padding: 8px;
+            margin: 8px 0;
+            max-width: 80%;
+            clear: both;
+            border: 1px solid #808080;
+            line-height: 1.4;
+            font-family: "Courier New", monospace;
+            word-wrap: break-word;
+        }
+
+        .user-message {
+            background-color: #dcdcdc;
+            float: right;
+            text-align: right;
+        }
+
+        .bot-message {
+            background-color: #f0f0f0;
+            float: left;
+            text-align: left;
+        }
+
+        .typing-cursor {
+            display: inline-block;
+            width: 8px;
+            background-color: black;
+            margin-left: 2px;
+            animation: blink 0.8s infinite;
+        }
+
+        @keyframes blink {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .input-area {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+        }
+
+        input {
+            flex: 1;
+            padding: 9px;
+            background-color: white;
+            color: black;
+            border-top: 3px solid #404040;
+            border-left: 3px solid #404040;
+            border-right: 3px solid #ffffff;
+            border-bottom: 3px solid #ffffff;
+            font-family: "Courier New", monospace;
+            font-size: 15px;
+        }
+
+        input:focus {
+            outline: 1px dotted black;
+        }
+
+        .input-area button {
+            width: 100px;
+            background-color: #c0c0c0;
+            color: black;
+            border-top: 3px solid #ffffff;
+            border-left: 3px solid #ffffff;
+            border-right: 3px solid #404040;
+            border-bottom: 3px solid #404040;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .input-area button:active {
+            border-top: 3px solid #404040;
+            border-left: 3px solid #404040;
+            border-right: 3px solid #ffffff;
+            border-bottom: 3px solid #ffffff;
+        }
+
+        .input-area button:disabled {
+            color: #808080;
+            cursor: not-allowed;
+        }
+
+        .status-bar {
+            margin-top: 12px;
+            background-color: #c0c0c0;
+            border-top: 2px solid #808080;
+            padding: 5px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+
+        .status-bar span {
+            border-top: 2px solid #808080;
+            border-left: 2px solid #808080;
+            border-right: 2px solid #ffffff;
+            border-bottom: 2px solid #ffffff;
+            padding: 3px 8px;
+        }
+
+        .chat-box::-webkit-scrollbar {
+            width: 16px;
+        }
+
+        .chat-box::-webkit-scrollbar-track {
+            background-color: #c0c0c0;
+        }
+
+        .chat-box::-webkit-scrollbar-thumb {
+            background-color: #808080;
+            border-top: 2px solid #ffffff;
+            border-left: 2px solid #ffffff;
+            border-right: 2px solid #404040;
+            border-bottom: 2px solid #404040;
+        }
+
+        .note-window {
+            width: 100%;
+            background-color: #c0c0c0;
+            border-top: 3px solid #ffffff;
+            border-left: 3px solid #ffffff;
+            border-right: 3px solid #404040;
+            border-bottom: 3px solid #404040;
+            box-shadow: 6px 6px 0px #000000;
+        }
+
+        .note-title-bar {
+            background: linear-gradient(to right, #000080, #1084d0);
+            color: white;
+            padding: 5px 8px;
+            font-weight: bold;
+        }
+
+        .note-content {
+            padding: 24px;
+            background-color: #e6e6e6;
+            border-top: 2px solid #808080;
+            color: black;
+        }
+
+        .note-content h2 {
+            margin-top: 0;
+            margin-bottom: 18px;
+            font-size: 30px;
+            color: #000080;
+        }
+
+        .note-content p {
+            font-size: 16px;
+            line-height: 1.6;
+            text-align: justify;
+            margin-bottom: 15px;
+        }
+
+        .note-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 18px;
+            margin-top: 20px;
+        }
+
+        .info-box {
+            background-color: white;
+            border-top: 3px solid #404040;
+            border-left: 3px solid #404040;
+            border-right: 3px solid #ffffff;
+            border-bottom: 3px solid #ffffff;
+            padding: 15px;
+        }
+
+        .info-box h3 {
+            margin-top: 0;
+            color: #000080;
+            font-size: 19px;
+        }
+
+        .info-box ul {
+            margin-bottom: 0;
+            padding-left: 22px;
+        }
+
+        .info-box li {
+            margin-bottom: 7px;
+            line-height: 1.35;
+        }
+
+        .info-box p {
+            font-size: 15px;
+            line-height: 1.5;
+            margin-bottom: 0;
+        }
+
+        .developer-box {
+            margin-top: 20px;
+            background-color: #000080;
+            color: white;
+            padding: 14px;
+            text-align: center;
+            font-size: 17px;
+            border-top: 2px solid #ffffff;
+            border-left: 2px solid #ffffff;
+            border-right: 2px solid #404040;
+            border-bottom: 2px solid #404040;
+        }
+
+        @media screen and (max-width: 900px) {
+            .main-container {
+                width: 94%;
+            }
+
+            .note-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chat-box {
+                height: 300px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .note-content h2 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="desktop">
+
+        <div class="main-container">
+
+            <div class="window">
+
+                <div class="title-bar">
+                    <span>ELIZA 95 - Therapy Simulator</span>
+
+                    <div class="window-buttons">
+                        <button>_</button>
+                        <button>□</button>
+                        <button>X</button>
+                    </div>
+                </div>
+
+                <div class="menu-bar">
+                    <span>File</span>
+                    <span>Edit</span>
+                    <span>View</span>
+                    <span>Help</span>
+                </div>
+
+                <div class="window-content">
+
+                    <div class="program-header">
+                        <div class="icon-box">E</div>
+
+                        <div>
+                            <h1>ELIZA Simulator</h1>
+                            <p>Version 1.0 - Rule Based Chat Program</p>
+                        </div>
+                    </div>
+
+                    <div id="chat-box" class="chat-box">
+                        <div class="bot-message">
+                            <strong>ELIZA:</strong> Hello, I am ELIZA. How are you feeling today?
+                        </div>
+                    </div>
+
+                    <div class="input-area">
+                        <input 
+                            type="text" 
+                            id="user-input" 
+                            placeholder="Enter message..."
+                            autocomplete="off"
+                        >
+
+                        <button id="send-btn" onclick="sendMessage()">Send</button>
+                    </div>
+
+                    <div class="status-bar">
+                        <span id="status-text">Ready</span>
+                        <span>1990s AI Simulation</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="note-window">
+
+                <div class="note-title-bar">
+                    <span>About ELIZA - Historical Note</span>
+                </div>
+
+                <div class="note-content">
+
+                    <h2>ELIZA: A Classic Milestone in Artificial Intelligence</h2>
+
+                    <p>
+                        ELIZA is one of the earliest and most influential chatbot programs in the history of
+                        artificial intelligence. It was created in the 1960s by Joseph Weizenbaum at the
+                        Massachusetts Institute of Technology. The program was designed to demonstrate how a
+                        computer could simulate conversation with a human user using simple rules.
+                    </p>
+
+                    <p>
+                        The most famous ELIZA script was called <strong>DOCTOR</strong>. It simulated a Rogerian
+                        psychotherapist by asking reflective questions. For example, when a user typed
+                        “I feel sad,” ELIZA could respond, “Why do you feel sad?” This created the impression
+                        that the computer understood the user, even though it was only following predefined rules.
+                    </p>
+
+                    <p>
+                        ELIZA worked using <strong>pattern matching</strong> and <strong>keyword detection</strong>.
+                        It searched the user's input for important words or phrases and selected a suitable
+                        predefined response. If no specific pattern was found, it used general replies such as
+                        “Please tell me more” or “Can you explain that further?”
+                    </p>
+
+                    <div class="note-grid">
+
+                        <div class="info-box">
+                            <h3>Key AI Concepts</h3>
+                            <ul>
+                                <li>Rule-based artificial intelligence</li>
+                                <li>Pattern matching</li>
+                                <li>Keyword detection</li>
+                                <li>Predefined responses</li>
+                                <li>Human-computer interaction</li>
+                                <li>Early natural language processing</li>
+                            </ul>
+                        </div>
+
+                        <div class="info-box">
+                            <h3>Historical Importance</h3>
+                            <ul>
+                                <li>Developed in the 1960s</li>
+                                <li>Created by Joseph Weizenbaum</li>
+                                <li>One of the first chatbot programs</li>
+                                <li>Inspired later conversational systems</li>
+                                <li>Introduced the idea of the ELIZA effect</li>
+                                <li>Still used in AI education today</li>
+                            </ul>
+                        </div>
+
+                        <div class="info-box">
+                            <h3>Why ELIZA Matters</h3>
+                            <p>
+                                ELIZA showed that even a simple rule-based system could create the illusion of
+                                intelligence. This helped researchers understand both the possibilities and the
+                                limitations of early conversational AI systems.
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="developer-box">
+                        Simulator developed by <strong>Manuka Rashen</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        let isBotTyping = false;
+
+        function sendMessage() {
+            let input = document.getElementById("user-input");
+            let sendButton = document.getElementById("send-btn");
+            let statusText = document.getElementById("status-text");
+
+            let userText = input.value.trim();
+
+            if (userText === "" || isBotTyping === true) {
+                return;
+            }
+
+            addUserMessage(userText);
+
+            input.value = "";
+
+            let botReply = getElizaReply(userText);
+
+            isBotTyping = true;
+            sendButton.disabled = true;
+            input.disabled = true;
+            statusText.textContent = "ELIZA is typing...";
+
+            setTimeout(function () {
+                typeBotMessage(botReply);
+            }, 400);
+        }
+
+        function addUserMessage(message) {
+            let chatBox = document.getElementById("chat-box");
+
+            let messageDiv = document.createElement("div");
+            messageDiv.className = "user-message";
+            messageDiv.innerHTML = "<strong>YOU:</strong> " + escapeHTML(message);
+
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function typeBotMessage(message) {
+            let chatBox = document.getElementById("chat-box");
+            let sendButton = document.getElementById("send-btn");
+            let input = document.getElementById("user-input");
+            let statusText = document.getElementById("status-text");
+
+            let messageDiv = document.createElement("div");
+            messageDiv.className = "bot-message";
+
+            let prefix = document.createElement("strong");
+            prefix.textContent = "ELIZA: ";
+
+            let textSpan = document.createElement("span");
+
+            let cursor = document.createElement("span");
+            cursor.className = "typing-cursor";
+            cursor.innerHTML = "&nbsp;";
+
+            messageDiv.appendChild(prefix);
+            messageDiv.appendChild(textSpan);
+            messageDiv.appendChild(cursor);
+
+            chatBox.appendChild(messageDiv);
+
+            let index = 0;
+            let typingSpeed = 35;
+
+            let typingInterval = setInterval(function () {
+                if (index < message.length) {
+                    textSpan.textContent += message.charAt(index);
+                    index++;
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                } else {
+                    clearInterval(typingInterval);
+
+                    cursor.remove();
+
+                    isBotTyping = false;
+                    sendButton.disabled = false;
+                    input.disabled = false;
+                    statusText.textContent = "Ready";
+
+                    input.focus();
+                }
+            }, typingSpeed);
+        }
+
+        function getElizaReply(userText) {
+            let text = userText.toLowerCase();
+
+            if (text.includes("hello") || text.includes("hi")) {
+                return "Hello. Please tell me what is on your mind.";
+            }
+
+            else if (text.includes("i feel")) {
+                return "Why do you feel that way?";
+            }
+
+            else if (text.includes("sad")) {
+                return "I am sorry to hear that. Can you explain why you feel sad?";
+            }
+
+            else if (text.includes("happy")) {
+                return "That is good to hear. What makes you feel happy?";
+            }
+
+            else if (text.includes("angry")) {
+                return "Why do you feel angry?";
+            }
+
+            else if (text.includes("stress") || text.includes("stressed")) {
+                return "What do you think is causing this stress?";
+            }
+
+            else if (text.includes("mother") || text.includes("father") || text.includes("family")) {
+                return "Tell me more about your family.";
+            }
+
+            else if (text.includes("friend") || text.includes("friends")) {
+                return "Tell me more about your friends.";
+            }
+
+            else if (text.includes("because")) {
+                return "Is that the real reason?";
+            }
+
+            else if (text.includes("computer") || text.includes("ai") || text.includes("artificial intelligence")) {
+                return "Why are you interested in computers or AI?";
+            }
+
+            else if (text.includes("exam") || text.includes("study") || text.includes("university")) {
+                return "How do your studies make you feel?";
+            }
+
+            else if (text.includes("i am")) {
+                return "How long have you been like that?";
+            }
+
+            else if (text.includes("i want")) {
+                return "Why do you want that?";
+            }
+
+            else if (text.includes("i need")) {
+                return "Would it really help you to get that?";
+            }
+
+            else if (text.includes("why")) {
+                return "Why do you think so?";
+            }
+
+            else if (text.includes("what")) {
+                return "What do you think the answer is?";
+            }
+
+            else if (text.includes("bye") || text.includes("goodbye")) {
+                return "Goodbye. It was nice talking to you.";
+            }
+
+            else {
+                let defaultReplies = [
+                    "Please tell me more.",
+                    "Can you explain that further?",
+                    "How does that make you feel?",
+                    "Why do you say that?",
+                    "That is interesting. Continue.",
+                    "Can you describe that in another way?",
+                    "What comes to your mind when you say that?"
+                ];
+
+                let randomIndex = Math.floor(Math.random() * defaultReplies.length);
+                return defaultReplies[randomIndex];
+            }
+        }
+
+        document.getElementById("user-input").addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        });
+
+        window.onload = function () {
+            document.getElementById("user-input").focus();
+        };
+
+        function escapeHTML(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+        }
+    </script>
+
+</body>
+</html>
