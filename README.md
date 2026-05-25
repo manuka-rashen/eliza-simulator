@@ -3,6 +3,8 @@
 A simple web-based ELIZA chatbot simulator built using **HTML, CSS, and JavaScript**.  
 This project recreates the basic behavior of the classic ELIZA chatbot with a professional **1990s-style program interface**.
 
+<img width="2400" height="1800" alt="image" src="https://github.com/user-attachments/assets/f2d3bacd-aa26-439c-9193-588cc53e609c" />
+
 ## Live Demo
 
 Access the deployed project here:
